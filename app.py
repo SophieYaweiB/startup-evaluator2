@@ -102,4 +102,4 @@ st.plotly_chart(fig, use_container_width=True)
 
 # --------- BOUTON RESET ----------
 if st.button("🔄 Nouvelle idée / Réinitialiser"):
-    st.experimental_rerun()
+    st.rerun()
