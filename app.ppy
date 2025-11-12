@@ -1,47 +1,89 @@
-# ✅ Installer Streamlit dans Colab
-!pip install streamlit -q
-
-# ✅ Écrire le fichier app.py (notre app)
-code = '''
 import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
 
-st.set_page_config(page_title="Évaluation d'idée", layout="wide")
-st.title("🚀 Grille d'Évaluation d'une idée de projet")
+# Configuration de la page
+st.set_page_config(page_title="Test d'Idée Startup", layout="wide")
+st.title("🚀 Test d'idée de startup - Version fondatrice")
 
-st.markdown("Note chaque critère entre 0 et 2 :")
+# Bouton de réinitialisation
+if st.button("🔄 Nouvelle idée / recommencer"):
+    st.experimental_rerun()
 
+# Introduction
+st.markdown("""
+Bienvenue dans ce test interactif pour évaluer ton idée de startup selon des critères inspirés de Y Combinator, Lean Startup et des approches de validation modernes.
+Réponds honnêtement pour mieux guider tes prochaines actions.
+""")
+
+# Critères d'évaluation
 criteria = [
-    "Problème réel",
-    "Motivation",
-    "Connaissance du marché",
-    "Scalabilité",
-    "Monétisation",
-    "Accès aux utilisateurs",
-    "Prototype rapide",
-    "Différenciation",
+    ("Problème réel", "Est-ce que le problème résolu est récurrent, douloureux et vérifié ?"),
+    ("Connaissance du marché", "Est-ce que tu connais bien les utilisateurs et leur comportement ?"),
+    ("Proposition de valeur claire", "Peux-tu expliquer clairement pourquoi c'est mieux que les alternatives ?"),
+    ("Prototype possible en 30j", "Peux-tu tester quelque chose de concret rapidement ?"),
+    ("Compétences internes", "Ton équipe a-t-elle les compétences clés pour exécuter ?"),
+    ("Canaux d'acquisition identifiés", "Sais-tu où et comment atteindre tes premiers utilisateurs ?"),
+    ("Modèle économique viable", "As-tu une idée de comment tu vas gagner de l'argent durablement ?"),
+    ("Motivation personnelle", "Es-tu prêt(e) à consacrer 2+ ans à ce projet ?"),
+    ("Légitimité personnelle (founder-market fit)", "As-tu une raison personnelle, compétence ou expérience forte qui te relie au problème ?")
 ]
 
+# Affichage interactif
 scores = {}
-for crit in criteria:
-    scores[crit] = st.slider(crit, 0, 2, 1)
+st.subheader("📝 Note chaque critère de 0 (pas du tout) à 2 (oui totalement)")
 
+cols = st.columns(2)
+for i, (crit, desc) in enumerate(criteria):
+    with cols[i % 2]:
+        with st.expander(crit):
+            st.markdown(f"*{desc}*")
+            scores[crit] = st.slider("Score", 0, 2, 1, key=crit)
+
+# Calcul et analyse
+st.markdown("---")
+st.subheader("📊 Résultats")
 total = sum(scores.values())
-max_score = len(criteria) * 2
-pct = int((total / max_score) * 100)
+max_total = len(scores) * 2
+pourcentage = int((total / max_total) * 100)
 
-st.markdown(f"### 🔢 Score total : {total} / {max_score} ({pct}%)")
+st.metric(label="Score total", value=f"{total} / {max_total}", delta=f"{pourcentage}%")
 
-if pct >= 80:
-    st.success("💚 Excellent ! Lance-toi !")
-elif pct >= 60:
-    st.info("🟡 Bonne base, à creuser.")
-elif pct >= 40:
-    st.warning("🟠 À affiner sérieusement.")
+# Graphique radar
+radar = go.Figure()
+radar.add_trace(go.Scatterpolar(
+    r=list(scores.values()) + [list(scores.values())[0]],
+    theta=list(scores.keys()) + [list(scores.keys())[0]],
+    fill='toself',
+    name='Score'
+))
+radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 2])), showlegend=False)
+st.plotly_chart(radar, use_container_width=True)
+
+# Analyse personnalisée
+st.markdown("---")
+st.subheader("🧠 Analyse personnalisée")
+
+if pourcentage >= 80:
+    st.success("Ton idée semble très mûre et motivante. Teste ton MVP rapidement ou prépare un pitch pour lever des fonds.")
+elif pourcentage >= 60:
+    st.info("Ton idée est prometteuse. Quelques points à creuser avant de foncer. Priorise les hypothèses critiques.")
+elif pourcentage >= 40:
+    st.warning("Tu es au stade d'exploration. Évite les dépenses, cherche des feedbacks réels, construis un prototype très simple.")
 else:
-    st.error("🔴 Trop risqué. À repenser.")
-'''
+    st.error("Trop d'inconnues. Clarifie le problème, parle à des utilisateurs, explore d'autres pistes.")
 
-with open("app.py", "w") as f:
-    f.write(code)
+# Conseils personnalisés par critère
+st.subheader("📌 Suggestions ciblées")
+for crit, desc in criteria:
+    val = scores[crit]
+    if val == 0:
+        st.warning(f"**{crit}** est à 0. Tu devrais approfondir : {desc}")
+    elif val == 1:
+        st.info(f"**{crit}** est à 1. Tu avances bien, mais valide concrètement : {desc}")
 
-print("✅ Code app.py créé ! Tu peux maintenant l’exécuter dans Streamlit.")
+# Footer
+st.markdown("""
+---
+Créé par [Toi 🤩] | Inspiré de Y Combinator, Lean Startup & Indie Hackers
+""")
