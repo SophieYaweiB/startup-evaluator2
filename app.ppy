@@ -1,0 +1,47 @@
+# ✅ Installer Streamlit dans Colab
+!pip install streamlit -q
+
+# ✅ Écrire le fichier app.py (notre app)
+code = '''
+import streamlit as st
+
+st.set_page_config(page_title="Évaluation d'idée", layout="wide")
+st.title("🚀 Grille d'Évaluation d'une idée de projet")
+
+st.markdown("Note chaque critère entre 0 et 2 :")
+
+criteria = [
+    "Problème réel",
+    "Motivation",
+    "Connaissance du marché",
+    "Scalabilité",
+    "Monétisation",
+    "Accès aux utilisateurs",
+    "Prototype rapide",
+    "Différenciation",
+]
+
+scores = {}
+for crit in criteria:
+    scores[crit] = st.slider(crit, 0, 2, 1)
+
+total = sum(scores.values())
+max_score = len(criteria) * 2
+pct = int((total / max_score) * 100)
+
+st.markdown(f"### 🔢 Score total : {total} / {max_score} ({pct}%)")
+
+if pct >= 80:
+    st.success("💚 Excellent ! Lance-toi !")
+elif pct >= 60:
+    st.info("🟡 Bonne base, à creuser.")
+elif pct >= 40:
+    st.warning("🟠 À affiner sérieusement.")
+else:
+    st.error("🔴 Trop risqué. À repenser.")
+'''
+
+with open("app.py", "w") as f:
+    f.write(code)
+
+print("✅ Code app.py créé ! Tu peux maintenant l’exécuter dans Streamlit.")
