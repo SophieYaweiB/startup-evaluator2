@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 st.set_page_config(page_title="Test d'idée Startup", layout="wide")
-st.title("🚀 Test ton Idée de Startup")
+st.title("🚀 Teste ton Idée de Startup")
 
 st.markdown("""
 Cette application t’aide à évaluer ton idée selon 5 grands axes :
@@ -25,11 +25,11 @@ criteria = [
     ("🧲 Besoin clair du marché", "Est-ce un problème réel et fréquent pour un segment identifié ?"),
     ("📈 Taille du marché", "Le marché est-il suffisamment grand ou en croissance ?"),
     ("🏹 Accessibilité", "Peux-tu atteindre tes clients facilement ?"),
-    
+
     # Produit
-    ("🛠️ MVP rapide possible", "Peux-tu lancer une version testable en < 30j ?"),
+    ("🛠️ MVP rapide possible", "Peux-tu lancer une version testable en moins de 30 jours ?"),
     ("💡 Proposition de valeur claire", "Ta solution est-elle différenciante ?"),
-    
+
     # Traction
     ("📊 Premiers retours utilisateurs", "As-tu eu des retours concrets de vrais utilisateurs ?"),
     ("💬 Intérêt / engagements", "As-tu une liste d'attente, des RDVs, ou un début de communauté ?"),
@@ -49,7 +49,7 @@ cols = st.columns(2)
 for i, (title, description) in enumerate(criteria):
     col = cols[i % 2]
     with col:
-        with st.expander(f"{title}"):
+        with st.expander(title):
             st.markdown(f"_{description}_")
             scores[title] = st.slider("Score", 0, 2, 1, key=title)
 
@@ -60,7 +60,8 @@ total_score = sum(scores.values())
 max_score = len(scores) * 2
 percent = total_score / max_score
 
-st.markdown(f"### Score global : **{total_score} / {max_score}** ({int(percent*100)}%)")
+st.markdown(f"### Score global : **{total_score} / {max_score}** ({int(percent * 100)}%)")
+
 if percent >= 0.8:
     st.success("💚 Fort potentiel ! Prête à être lancée ou présentée.")
 elif percent >= 0.6:
@@ -90,9 +91,13 @@ fig = go.Figure()
 fig.add_trace(go.Scatterpolar(
     r=list(section_scores.values()) + [list(section_scores.values())[0]],
     theta=list(section_scores.keys()) + [list(section_scores.keys())[0]],
-    fill='toself'
+    fill='toself',
+    name='Évaluation'
 ))
-fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 1])), showlegend=False)
+fig.update_layout(
+    polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+    showlegend=False
+)
 st.plotly_chart(fig, use_container_width=True)
 
 # --------- BOUTON RESET ----------
