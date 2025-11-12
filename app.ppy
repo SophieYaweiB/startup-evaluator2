@@ -2,88 +2,99 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-# Configuration de la page
-st.set_page_config(page_title="Test d'Idée Startup", layout="wide")
-st.title("🚀 Test d'idée de startup - Version fondatrice")
+st.set_page_config(page_title="Test d'idée Startup", layout="wide")
+st.title("🚀 Test ton Idée de Startup")
 
-# Bouton de réinitialisation
-if st.button("🔄 Nouvelle idée / recommencer"):
-    st.experimental_rerun()
-
-# Introduction
 st.markdown("""
-Bienvenue dans ce test interactif pour évaluer ton idée de startup selon des critères inspirés de Y Combinator, Lean Startup et des approches de validation modernes.
-Réponds honnêtement pour mieux guider tes prochaines actions.
+Cette application t’aide à évaluer ton idée selon 5 grands axes :
+- **Marché**
+- **Produit**
+- **Traction**
+- **Exécution**
+- **Alignement personnel**
+
+Chaque critère est noté de **0 à 2** :
+- 0 = Non / Pas du tout prêt
+- 1 = Moyennement / À valider
+- 2 = Oui / Validé ou fort
 """)
 
-# Critères d'évaluation
+# --------- CRITÈRES ----------
 criteria = [
-    ("Problème réel", "Est-ce que le problème résolu est récurrent, douloureux et vérifié ?"),
-    ("Connaissance du marché", "Est-ce que tu connais bien les utilisateurs et leur comportement ?"),
-    ("Proposition de valeur claire", "Peux-tu expliquer clairement pourquoi c'est mieux que les alternatives ?"),
-    ("Prototype possible en 30j", "Peux-tu tester quelque chose de concret rapidement ?"),
-    ("Compétences internes", "Ton équipe a-t-elle les compétences clés pour exécuter ?"),
-    ("Canaux d'acquisition identifiés", "Sais-tu où et comment atteindre tes premiers utilisateurs ?"),
-    ("Modèle économique viable", "As-tu une idée de comment tu vas gagner de l'argent durablement ?"),
-    ("Motivation personnelle", "Es-tu prêt(e) à consacrer 2+ ans à ce projet ?"),
-    ("Légitimité personnelle (founder-market fit)", "As-tu une raison personnelle, compétence ou expérience forte qui te relie au problème ?")
+    # Marché
+    ("🧲 Besoin clair du marché", "Est-ce un problème réel et fréquent pour un segment identifié ?"),
+    ("📈 Taille du marché", "Le marché est-il suffisamment grand ou en croissance ?"),
+    ("🏹 Accessibilité", "Peux-tu atteindre tes clients facilement ?"),
+    
+    # Produit
+    ("🛠️ MVP rapide possible", "Peux-tu lancer une version testable en < 30j ?"),
+    ("💡 Proposition de valeur claire", "Ta solution est-elle différenciante ?"),
+    
+    # Traction
+    ("📊 Premiers retours utilisateurs", "As-tu eu des retours concrets de vrais utilisateurs ?"),
+    ("💬 Intérêt / engagements", "As-tu une liste d'attente, des RDVs, ou un début de communauté ?"),
+
+    # Exécution
+    ("🧠 Compétences clés internes", "Les compétences nécessaires sont-elles disponibles ?"),
+    ("🧪 Capacité à tester rapidement", "Peux-tu faire des tests terrain en 7-15 jours ?"),
+
+    # Alignement
+    ("🔥 Motivation personnelle", "Es-tu personnellement motivée et alignée avec le problème ?"),
+    ("💖 Affinité avec les utilisateurs", "Tu connais bien leur quotidien / frustrations ?"),
 ]
 
-# Affichage interactif
+# --------- SLIDERS ----------
 scores = {}
-st.subheader("📝 Note chaque critère de 0 (pas du tout) à 2 (oui totalement)")
-
 cols = st.columns(2)
-for i, (crit, desc) in enumerate(criteria):
-    with cols[i % 2]:
-        with st.expander(crit):
-            st.markdown(f"*{desc}*")
-            scores[crit] = st.slider("Score", 0, 2, 1, key=crit)
+for i, (title, description) in enumerate(criteria):
+    col = cols[i % 2]
+    with col:
+        with st.expander(f"{title}"):
+            st.markdown(f"_{description}_")
+            scores[title] = st.slider("Score", 0, 2, 1, key=title)
 
-# Calcul et analyse
-st.markdown("---")
-st.subheader("📊 Résultats")
-total = sum(scores.values())
-max_total = len(scores) * 2
-pourcentage = int((total / max_total) * 100)
+# --------- ANALYSE ----------
+st.markdown("## 📊 Résultats")
 
-st.metric(label="Score total", value=f"{total} / {max_total}", delta=f"{pourcentage}%")
+total_score = sum(scores.values())
+max_score = len(scores) * 2
+percent = total_score / max_score
 
-# Graphique radar
-radar = go.Figure()
-radar.add_trace(go.Scatterpolar(
-    r=list(scores.values()) + [list(scores.values())[0]],
-    theta=list(scores.keys()) + [list(scores.keys())[0]],
-    fill='toself',
-    name='Score'
-))
-radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 2])), showlegend=False)
-st.plotly_chart(radar, use_container_width=True)
-
-# Analyse personnalisée
-st.markdown("---")
-st.subheader("🧠 Analyse personnalisée")
-
-if pourcentage >= 80:
-    st.success("Ton idée semble très mûre et motivante. Teste ton MVP rapidement ou prépare un pitch pour lever des fonds.")
-elif pourcentage >= 60:
-    st.info("Ton idée est prometteuse. Quelques points à creuser avant de foncer. Priorise les hypothèses critiques.")
-elif pourcentage >= 40:
-    st.warning("Tu es au stade d'exploration. Évite les dépenses, cherche des feedbacks réels, construis un prototype très simple.")
+st.markdown(f"### Score global : **{total_score} / {max_score}** ({int(percent*100)}%)")
+if percent >= 0.8:
+    st.success("💚 Fort potentiel ! Prête à être lancée ou présentée.")
+elif percent >= 0.6:
+    st.info("🟡 Bonne base. Tu peux consolider quelques points avant de te lancer.")
+elif percent >= 0.4:
+    st.warning("🟠 L'idée mérite plus de validation.")
 else:
-    st.error("Trop d'inconnues. Clarifie le problème, parle à des utilisateurs, explore d'autres pistes.")
+    st.error("🔴 Trop d'incertitudes. Travaille certains fondamentaux.")
 
-# Conseils personnalisés par critère
-st.subheader("📌 Suggestions ciblées")
-for crit, desc in criteria:
-    val = scores[crit]
-    if val == 0:
-        st.warning(f"**{crit}** est à 0. Tu devrais approfondir : {desc}")
-    elif val == 1:
-        st.info(f"**{crit}** est à 1. Tu avances bien, mais valide concrètement : {desc}")
+# --------- VISUALISATION ----------
+st.markdown("## 📈 Visualisation radar")
 
-# Footer
-st.markdown("""
----
-Créé par [Toi 🤩] | Inspiré de Y Combinator, Lean Startup & Indie Hackers
-""")
+sections = {
+    "Marché": criteria[0:3],
+    "Produit": criteria[3:5],
+    "Traction": criteria[5:7],
+    "Exécution": criteria[7:9],
+    "Alignement": criteria[9:11]
+}
+
+section_scores = {}
+for sec, crits in sections.items():
+    s = sum(scores[c[0]] for c in crits)
+    section_scores[sec] = s / (2 * len(crits))
+
+fig = go.Figure()
+fig.add_trace(go.Scatterpolar(
+    r=list(section_scores.values()) + [list(section_scores.values())[0]],
+    theta=list(section_scores.keys()) + [list(section_scores.keys())[0]],
+    fill='toself'
+))
+fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 1])), showlegend=False)
+st.plotly_chart(fig, use_container_width=True)
+
+# --------- BOUTON RESET ----------
+if st.button("🔄 Nouvelle idée / Réinitialiser"):
+    st.experimental_rerun()
